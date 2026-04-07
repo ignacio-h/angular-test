@@ -1,0 +1,17 @@
+@if (user) {
+    <article class="user-card">
+        <img [src]="user.avatar_url" [alt]="user.login" />
+        <div class="user-info">
+            <h2>{{ user.name ?? user.login }}</h2>
+            <a [href]="user.html_url" target="_blank">@{{ user.login }}</a>
+            @if (user.bio) {
+                <p class="bio">{{ user.bio }}</p>
+            }
+            <ul class="stats">
+                <li><strong>{{ user.public_repos }}</strong> repositorios</li>
+                <li><strong>{{ user.followers }}</strong> seguidores</li>
+                <li><strong>{{ user.following }}</strong> siguiendo</li>
+            </ul>
+        </div>
+    </article>
+}
