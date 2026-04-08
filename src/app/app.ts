@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterOutlet } from '@angular/router';
 import { UserCard } from './user-card/user-card';
 import { GithubUser } from './models/github.models';
+import { GithubService } from './github';
 
 @Component({
   selector: 'app-root',
@@ -10,15 +12,13 @@ import { GithubUser } from './models/github.models';
   styleUrl: './app.css'
 })
 export class App {
-  // demo con datos hardcodeados
-  testUser: GithubUser = {
-    login: 'torvalds',
-    name: 'Linus Torvalds',
-    avatar_url: 'https://avatars.githubusercontent.com/u/1024025',
-    public_repos: 8,
-    followers: 230000,
-    following: 0,
-    bio: 'Nothing to see here, move along.',
-    html_url: 'https://github.com/torvalds'
+  private githubService = inject(GithubService);
+  // cuando hay cambios, Angular renderiza los componentes que dependen de esta variable
+  user = signal<GithubUser | null>(null);
+
+  constructor() {
+    this.githubService.getUser('torvalds')
+      .pipe(takeUntilDestroyed()) // para cancelar la suscripción y evitar fugas de memoria o bugs
+      .subscribe(data => this.user.set(data));
   }
 }

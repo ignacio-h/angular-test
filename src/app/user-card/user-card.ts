@@ -1,3 +1,6 @@
+// ng g c user-card 
+// o ng generate component user-card
+
 import { Component, Input } from '@angular/core';
 import { GithubUser } from '../models/github.models';
 
