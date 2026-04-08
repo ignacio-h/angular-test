@@ -1,0 +1,29 @@
+<section class="search-container">
+    <h1>DevPulse</h1>
+    <p class="subtitle">Explora perfiles de GitHub</p>
+
+    <div class="search-box">
+        <input 
+            type="text" 
+            placeholder="Nombre de usuario..." 
+            [value]="username()" 
+            (input)="username.set($any($event.target).value)"
+            (keyup.enter)="onSearch()"
+        />
+        <button [disabled]="!isValidUsername() || isLoading()" (click)="onSearch()">
+            @if (isLoading()) {
+                Buscando...
+            } @else {
+                Buscar
+            }
+        </button>
+    </div>
+
+    @if (error()) {
+        <p class="error">{{ error() }}</p>
+    }
+
+    @if (user()) {
+        <app-user-card [user]="user()"></app-user-card>
+    }
+</section>
