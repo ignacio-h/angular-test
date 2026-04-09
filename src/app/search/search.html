@@ -24,6 +24,9 @@
     }
 
     @if (user()) {
-        <app-user-card [user]="user()"></app-user-card>
+        <div class="result" (click)="onViewProfile(user()!.login)">
+            <p class="hint">Haz clic para ver el perfil completo</p>
+            <app-user-card [user]="user()"></app-user-card>
+        </div>
     }
 </section>
