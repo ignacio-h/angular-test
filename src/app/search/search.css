@@ -55,3 +55,13 @@ button {
     font-size: 0.9rem;
     margin-bottom: 1rem;
 }
+
+.result {
+    cursor: pointer;
+}
+
+.hint {
+    font-size: 0.8rem;
+    color: #57606a;
+    margin-bottom: 0.5rem;
+}

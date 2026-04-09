@@ -1,0 +1,15 @@
+<section class="user-container">
+    <button class="back-btn" (click)="goBack()">← Volver</button>
+
+    @if (isLoading()) {
+        <p class="loading">Cargando perfil...</p>
+    }
+
+    @if (error()) {
+        <p class="error">{{ error() }}</p>
+    }
+
+    @if (user()) {
+        <app-user-card [user]="user()" />
+    }
+</section>

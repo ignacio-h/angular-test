@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { GithubUser } from '../models/github.models';
 import { GithubService } from '../github';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -13,6 +14,7 @@ import { UserCard } from '../user-card/user-card';
 })
 export class Search {
   private githubService = inject(GithubService);
+  private router = inject(Router);
 
   // estado de la búsqueda
   username = signal('');
@@ -22,7 +24,7 @@ export class Search {
 
   isValidUsername = computed(() => this.username()?.trim().length >= 3);
 
-  // puente entre el evento del imput y el rxjs
+  // puente entre el evento del input y el rxjs
   private search$ = new Subject<string>();
 
   constructor() {
@@ -57,5 +59,9 @@ export class Search {
   onSearch(): void {
     if (this.isValidUsername())
       this.search$.next(this.username().trim());
+  }
+
+  onViewProfile(username: string): void {
+    this.router.navigate(['/user', username])
   }
 }
