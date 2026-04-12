@@ -8,15 +8,7 @@
             placeholder="Nombre de usuario..." 
             [value]="username()" 
             (input)="username.set($any($event.target).value)"
-            (keyup.enter)="onSearch()"
         />
-        <button [disabled]="!isValidUsername() || isLoading()" (click)="onSearch()">
-            @if (isLoading()) {
-                Buscando...
-            } @else {
-                Buscar
-            }
-        </button>
     </div>
 
     @if (error()) {
@@ -24,7 +16,7 @@
     }
 
     @if (user()) {
-        <div class="result" (click)="onViewProfile(user()!.login)">
+        <div class="result" (click)="navigateToProfile(user()!.login)">
             <p class="hint">Haz clic para ver el perfil completo</p>
             <app-user-card [user]="user()"></app-user-card>
         </div>

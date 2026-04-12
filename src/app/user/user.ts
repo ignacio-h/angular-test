@@ -1,9 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GithubService } from '../github';
-import { GithubUser } from '../models/github.models';
+import { GithubUser, GithubRepo } from '../models/github.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { switchMap, catchError, of } from 'rxjs';
+import { switchMap, catchError, of, forkJoin } from 'rxjs';
 import { UserCard } from '../user-card/user-card';
 
 @Component({
@@ -18,6 +18,7 @@ export class User {
   private githubService = inject(GithubService);
 
   user = signal<GithubUser | null>(null);
+  repos = signal<GithubRepo[]>([]);
   isLoading = signal(true);
   error = signal<string | null>(null);
 
@@ -25,7 +26,10 @@ export class User {
     this.route.paramMap.pipe(
       switchMap(params => {
         const username = params.get('username') ?? '';
-        return this.githubService.getUser(username!).pipe(
+        return forkJoin({
+          user: this.githubService.getUser(username!),
+          repos: this.githubService.getRepos(username!)
+        }).pipe(
           catchError(() => {
             this.error.set('Usuario no encontrado');
             return of(null);
@@ -35,8 +39,10 @@ export class User {
       takeUntilDestroyed()
     ).subscribe(data => {
       this.isLoading.set(false);
-      if (data)
-        this.user.set(data);
+      if (data) {
+        this.user.set(data.user);
+        this.repos.set(data.repos.filter(r => !r.fork)); // Sólo repos originales
+      }
     });
   }
 
