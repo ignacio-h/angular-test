@@ -4,7 +4,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { GithubUser } from './models/github.models';
+import { GithubUser, GithubRepo } from './models/github.models';
 
 @Injectable({
   providedIn: 'root',
@@ -15,5 +15,11 @@ export class GithubService {
 
   getUser(username: string): Observable<GithubUser> {
     return this.http.get<GithubUser>(`${this.baseUrl}/users/${username}`);
+  }
+
+  getRepos(username: string): Observable<GithubRepo[]> {
+    return this.http.get<GithubRepo[]>(
+      `${this.baseUrl}/users/${username}/repos?sort=updated&per_page=5`
+    );
   }
 }

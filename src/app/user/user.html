@@ -11,5 +11,24 @@
 
     @if (user()) {
         <app-user-card [user]="user()" />
+
+        <h3 class="respos-title">Repositorios recientes</h3>
+
+        <ul class="repo-list">
+            @for (repo of repos(); track repo.id) {
+                <li class="repo-item">
+                    <a [href]="repo.html_url" target="_blank">{{ repo.name }}</a>
+                    @if (repo.description) {
+                        <p>{{ repo.description }}</p>
+                    }
+                    <div class="repo-meta">
+                        @if (repo.language) {
+                            <span>{{ repo.language }}</span>
+                        }
+                        <span>⭐ {{ repo.stargazers_count }}</span>
+                    </div>
+                </li>
+            }
+        </ul>
     }
 </section>
