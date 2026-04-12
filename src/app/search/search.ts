@@ -1,9 +1,8 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { GithubUser } from '../models/github.models';
 import { GithubService } from '../github';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Subject, switchMap, catchError, of, tap } from 'rxjs';
+import { takeUntilDestroyed, toSignal, toObservable } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged, switchMap, catchError, of, filter, tap, map } from 'rxjs';
 import { UserCard } from '../user-card/user-card';
 
 @Component({
@@ -18,50 +17,39 @@ export class Search {
 
   // estado de la búsqueda
   username = signal('');
-  user = signal<GithubUser | null>(null);
   isLoading = signal(false);
   error = signal<string | null>(null);
 
   isValidUsername = computed(() => this.username()?.trim().length >= 3);
 
-  // puente entre el evento del input y el rxjs
-  private search$ = new Subject<string>();
-
-  constructor() {
-    this.search$
-    .pipe(
+  user = toSignal(
+    toObservable(this.username).pipe(
+      debounceTime(400),
+      map(username => username.trim()),
+      distinctUntilChanged(), // Filtra emisiones consecutivas con el mismo valor
+      filter(username => username.length >= 3),
       tap(() => {
-        // tap: ejecuta un efecto secundario sin modificar el flujo
         this.isLoading.set(true);
-        this.error.set(null);
-        this.user.set(null);
+        this.error.set(null)
       }),
-      switchMap(username => this.githubService.getUser(username).pipe(
-        // switchMap: cancela la petición anterior si llega una nueva
-        catchError(err => {
-          // catchError: captura errores y devuelve un nuevo observable para no terminarlo y dejar de escuchar búsquedas futuras
-          this.error.set(err.status === 404 
-            ? 'Usuario no encontrado'
-            : 'Error al buscar el usuario'
-          );
-          return of(null); // devuelve un observable con null para continuar el flujo
-        })
-      )),
-      takeUntilDestroyed() // se completa automáticamente al destruir el componente
-    )
-    .subscribe(data => {
-      this.isLoading.set(false);
-      if (data)
-        this.user.set(data);
-    })
-  }
+      switchMap(username => 
+        this.githubService.getUser(username).pipe(
+          catchError(err => {
+            const msg = err.status === 404
+              ? `Usuario ${username} no encontrado`
+              : 'Error al conectar con GitHub';
+            this.error.set(msg);
+            return of(null);
+          })
+        )
+      ),
+      tap(() => this.isLoading.set(false)),
+      takeUntilDestroyed()
+    ),
+    { initialValue: null }
+  );
 
-  onSearch(): void {
-    if (this.isValidUsername())
-      this.search$.next(this.username().trim());
-  }
-
-  onViewProfile(username: string): void {
-    this.router.navigate(['/user', username])
+  navigateToProfile(username: string): void {
+    this.router.navigate(['/user', username]);
   }
 }
